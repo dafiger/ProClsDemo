@@ -54,6 +54,27 @@ target 'ProClsDemo' do
 end
 
 # pod update --no-repo-update
+
+def findTargetName(name)
+    configStr = 'Target_ON=1'
+    if name == "Pods-CommonPods-BrightSunnySky" then
+        configStr = 'PURANG_ON=1'
+    elsif name == "Pods-CommonPods-BrightSunnySkyHengNan" then
+        configStr = 'HENGNAN_ON=1'
+    elsif name == "Pods-CommonPods-BrightSunnySkyXinXian" then
+        configStr = 'XINXIAN_ON=1' 
+    elsif name == "Pods-CommonPods-BrightSunnySkyYingKou" then
+        configStr = 'YINGKOU_ON=1' 
+    elsif name == "Pods-CommonPods-BrightSunnySkyQingXu" then
+        configStr = 'QINGXU_ON=1' 
+    elsif name == "Pods-CommonPods-BrightSunnySkyAnShan" then
+        configStr = 'ANSHAN_ON=1' 
+    elsif name == "Pods-ProClsDemo" then
+        configStr = 'GUSHI_ON=1' 
+    end
+    return configStr
+end
+
 # 实现post_install Hooks
 post_install do |installer|
 # puts 为在终端打印方法
@@ -61,11 +82,21 @@ puts "##### post_install start #####"
 
   # # 1. 遍历项目中所有target
   installer.pods_project.targets.each do |target|
+  	puts "---------#{target.name}"
+    configStr = findTargetName target.name
+    puts "---------#{configStr}"
+
+
     # 2. 遍历build_configurations
     target.build_configurations.each do |config|
       # 3. 修改build_settings中的ENABLE_BITCODE
       config.build_settings['ENABLE_BITCODE'] = 'NO'
 
+      if config.name == "Debug" then
+         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)','PRO_ON=1','DEBUG=1',"#{configStr}"]
+      elsif config.name == "Release" then
+         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)','PRO_ON=1',"#{configStr}"]
+      end
       # config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
 
       if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 8.0
